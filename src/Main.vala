@@ -32,6 +32,18 @@ public class Gtk4Demo.AppLauncherWindow : Gtk.ApplicationWindow {
         set_default_size (640, 320);
         set_title ("Application Launcher");
 
+        /* We use a #GListStore here, which is a simple array-like list implementation
+         * for manual management.
+         * List models need to know what type of data they provide, so we need to
+         * provide the type here. As we want to do a list of applications, #GAppInfo
+         * is the object we provide.
+         */
+        var app_list = new GLib.ListStore (typeof (GLib.AppInfo));
+        var apps = GLib.AppInfo.get_all ();
+        foreach (var app in apps) {
+            app_list.append (app);
+        }
+
         /* The #GtkListitemFactory is what is used to create #GtkListItems
          * to display the data from the model. So it is absolutely necessary
          * to create one.
@@ -45,36 +57,17 @@ public class Gtk4Demo.AppLauncherWindow : Gtk.ApplicationWindow {
         factory.bind.connect (bind_listitem_cb);
 
         /* Create the list widget here.
+         * The list will now take items from the model and use the factory
+         * to create as many listitems as it needs to show itself to the user.
          */
-        var list_view = new Gtk.ListView.with_factory (factory);
+        var list_view = new Gtk.ListView.with_factory (app_list, factory);
 
         /* We connect the activate signal here. It's the function we defined
          * above for launching the selected application.
          */
         list_view.activate.connect (activate_cb);
 
-        /* And of course we need to set the data model. Here we call the function
-         * we wrote above that gives us the list of applications. Then we set
-         * it on the list widget.
-         * The list will now take items from the model and use the factory
-         * to create as many listitems as it needs to show itself to the user.
-         */
-
-        /* We use a #GListStore here, which is a simple array-like list implementation
-         * for manual management.
-         * List models need to know what type of data they provide, so we need to
-         * provide the type here. As we want to do a list of applications, #GAppInfo
-         * is the object we provide.
-         */
-        var list_store = new GLib.ListStore (typeof (GLib.AppInfo));
-        var apps = GLib.AppInfo.get_all ();
-        foreach (var app in apps) {
-            list_store.append (app);
-        }
-
-        list_view.set_model (list_store);
-
-        var scroll_win = new Gtk.ScrolledWindow (null, null);
+        var scroll_win = new Gtk.ScrolledWindow ();
         this.set_child (scroll_win);
         scroll_win.set_child (list_view);
     }
