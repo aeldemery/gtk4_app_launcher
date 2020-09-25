@@ -60,7 +60,9 @@ public class Gtk4Demo.AppLauncherWindow : Gtk.ApplicationWindow {
          * The list will now take items from the model and use the factory
          * to create as many listitems as it needs to show itself to the user.
          */
-        var list_view = new Gtk.ListView.with_factory (app_list, factory);
+        //var list_view = new Gtk.ListView.with_factory (app_list, factory);
+        var selection = new Gtk.SingleSelection (app_list);
+        var list_view = new Gtk.ListView (selection, factory);
 
         /* We connect the activate signal here. It's the function we defined
          * above for launching the selected application.
